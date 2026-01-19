@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Интерактивная карта с адресами</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    #map {
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    // 1. Инициализация карты (центр мира)
+    const map = L.map('map').setView([20, 0], 2);
+
+    // 2. Подложка карты (OpenStreetMap)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // 3. Пример адресов (потом заменишь данными из Excel)
+    const addresses = [
+      {
+        name: 'Офис в Берлине',
+        address: 'Alexanderplatz, Berlin, Germany'
+      },
+      {
+        name: 'Точка в Нью-Йорке',
+        address: 'Times Square, New York, USA'
+      }
+    ];
+
+    // 4. Функция геокодинга адреса через Nominatim (OpenStreetMap)
+    async function geocodeAddress(item) {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(item.address)}`;
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data && data.length > 0) {
+        const lat = data[0].lat;
+        const lon = data[0].lon;
+
+        L.marker([lat, lon])
+          .addTo(map)
+          .bindPopup(`<b>${item.name}</b><br>${item.address}`);
+      }
+    }
+
+    // 5. Добавляем маркеры на карту
+    addresses.forEach(addr => geocodeAddress(addr));
+  </script>
+</body>
+</html>
